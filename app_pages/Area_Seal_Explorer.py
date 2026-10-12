@@ -381,7 +381,7 @@ def build_node_hover(node_id, node, edges):
 # Geographic map
 # ==================================================
 
-def build_geographic_map(graph, visible_ids, visible_edges):
+def build_geographic_map(graph, visible_ids, visible_edges, selected_id = None):
     """
     Create a Folium map with larger OAS markers, styled node popups,
     and directed route tooltips.
@@ -642,17 +642,19 @@ def build_geographic_map(graph, visible_ids, visible_edges):
             if edge.source == node_id or edge.target == node_id
         )
 
-        inbound_count = len(node.inbound_orders)
-        outbound_count = len(node.outbound_orders)
+        inbound_count = len(node.inbound_orders or [])
+        outbound_count = len(node.outbound_orders or [])
 
-        if inbound_count and outbound_count:
-            node_color = "#7c3aed"
-        elif outbound_count:
-            node_color = "#15803d"
+        if node_id == selected_id:
+            node_color = "#000000" 
+        elif inbound_count and outbound_count:
+            node_color = "#2563eb"  # Blue: both
         elif inbound_count:
-            node_color = "#2563eb"
+            node_color = "#dc2626"  # Red: inbound only
+        elif outbound_count:
+            node_color = "#16a34a"  # Green: outbound only
         else:
-            node_color = "#6b7280"
+            node_color = "#6b7280"  # Gray: neither
 
         popup_html = build_node_popup(
             node_id,
@@ -785,16 +787,22 @@ def render_page():
             if edge.source == selected_id
         ]
     else:
-        neighborhood_ids = {selected_id}
-        for edge in edges:
-            if edge.source == selected_id:
-                neighborhood_ids.add(edge.target)
-            if edge.target == selected_id:
-                neighborhood_ids.add(edge.source)
+        # neighborhood_ids = {selected_id}
+        # for edge in edges:
+        #     if edge.source == selected_id:
+        #         neighborhood_ids.add(edge.target)
+        #     if edge.target == selected_id:
+        #         neighborhood_ids.add(edge.source)
 
+        # visible_edges = [
+        #     edge for edge in edges
+        #     if edge.source in neighborhood_ids and edge.target in neighborhood_ids
+        # ]
         visible_edges = [
-            edge for edge in edges
-            if edge.source in neighborhood_ids and edge.target in neighborhood_ids
+            edge
+            for edge in edges
+            if edge.source == selected_id
+            or edge.target == selected_id
         ]
 
     # Direction-specific modes show only the selected area and endpoints of
@@ -818,7 +826,7 @@ def render_page():
     )
 
     geographic_map, mapped_nodes, mapped_edges = build_geographic_map(
-        graph, visible_ids, visible_edges
+        graph, visible_ids, visible_edges, selected_id=selected_id
     )
     if geographic_map is None:
         st.warning(
@@ -866,14 +874,31 @@ def render_page():
         inbound = metrics["inbound"]
         outbound = metrics["outbound"]
 
-        if inbound["order_count"] and outbound["order_count"]:
-            node_color = {"background": "#7c3aed", "border": "#4c1d95"}
-        elif outbound["order_count"]:
-            node_color = {"background": "#15803d", "border": "#14532d"}
+        if node_id == selected_id:
+            node_color = {
+                "background": "#000000",
+                "border": "#000000",
+            }
+        elif inbound["order_count"] and outbound["order_count"]:
+            node_color = {
+                "background": "#2563eb",
+                "border": "#1e40af",
+            }
         elif inbound["order_count"]:
-            node_color = {"background": "#2563eb", "border": "#1e3a8a"}
+            node_color = {
+                "background": "#dc2626",
+                "border": "#991b1b",
+            }
+        elif outbound["order_count"]:
+            node_color = {
+                "background": "#16a34a",
+                "border": "#166534",
+            }
         else:
-            node_color = {"background": "#9ca3af", "border": "#4b5563"}
+            node_color = {
+                "background": "#9ca3af",
+                "border": "#4b5563",
+            }
 
         net.add_node(
             node_id,

@@ -54,4 +54,5 @@ def load_tables() -> dict:
             f"{len(tables[name]):,} rows"
         )
 
+
     return tables

@@ -11,6 +11,15 @@ class Node:
     cx:float | None = None
     cy:float | None = None
     
+    blx_coord:float | None = None
+    bly_coord:float | None = None
+    tlx_coord:float | None = None
+    tly_coord:float | None = None
+    trx_coord:float | None = None
+    try_coord:float | None = None
+    brx_coord:float | None = None
+    brx_coord:float | None = None
+    
     # InBound/Outbound Loading meter and and weight 
     inbound_loading_meter: float = 0.0
     outbound_loading_meter: float = 0.0
