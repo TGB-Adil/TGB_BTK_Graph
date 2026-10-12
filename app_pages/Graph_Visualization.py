@@ -64,6 +64,34 @@ def get_valid_coordinates(node):
 
     return latitude, longitude
 
+def get_valid_polygon_coordinates(node):
+    """Return the four OAS corners in Folium's (latitude, longitude) order."""
+
+    corners = [
+        (node.bly_coord, node.blx_coord),  # Bottom-left
+        (node.tly_coord, node.tlx_coord),  # Top-left
+        (node.try_coord, node.trx_coord),  # Top-right
+        (node.bry_coord, node.brx_coord),  # Bottom-right
+    ]
+
+    try:
+        coordinates = [
+            (float(latitude), float(longitude))
+            for latitude, longitude in corners
+        ]
+    except (TypeError, ValueError):
+        return None
+
+    for latitude, longitude in coordinates:
+        if not math.isfinite(latitude) or not math.isfinite(longitude):
+            return None
+
+        if not (-90 <= latitude <= 90 and -180 <= longitude <= 180):
+            return None
+
+    # Close the polygon.
+    return coordinates + [coordinates[0]]
+
 
 def get_order_value(order, *field_names, default=0):
     """Read a value from an order represented by a dict or object."""
@@ -419,8 +447,13 @@ def build_geographic_map(graph, visible_ids, visible_edges):
     )
 
     node_layer = folium.FeatureGroup(
-        name="OAS nodes",
+        name="OAS centre points",
         show=True,
+    )
+
+    polygon_layer = folium.FeatureGroup(
+        name="OAS Area Seal polygons",
+        show=False,
     )
 
     # --------------------------------------------------
@@ -618,7 +651,25 @@ def build_geographic_map(graph, visible_ids, visible_edges):
 
     for node_id, position in coordinates.items():
         node = graph.nodes[node_id]
+        polygon_coordinates = get_valid_polygon_coordinates(node)
 
+        if polygon_coordinates is not None:
+            folium.Polygon(
+                locations=polygon_coordinates,
+                color="#2563eb",
+                weight=2,
+                fill=True,
+                fill_color="#60a5fa",
+                fill_opacity=0.20,
+                tooltip=folium.Tooltip(
+                    f"<b>OAS Area:</b> {safe_html(node_id)}",
+                    sticky=True,
+                ),
+                popup=folium.Popup(
+                    f"<b>OAS Area:</b> {safe_html(node_id)}",
+                    max_width=300,
+                ),
+            ).add_to(polygon_layer)
         degree_count = sum(
             1 for edge in visible_edges
             if edge.source == node_id or edge.target == node_id
@@ -663,7 +714,7 @@ def build_geographic_map(graph, visible_ids, visible_edges):
 
     route_layer.add_to(geographic_map)
     node_layer.add_to(geographic_map)
-
+    polygon_layer.add_to(geographic_map)
     folium.LayerControl(
         collapsed=False,
     ).add_to(geographic_map)

@@ -11,14 +11,19 @@ class Node:
     cx:float | None = None
     cy:float | None = None
     
-    blx_coord:float | None = None
-    bly_coord:float | None = None
-    tlx_coord:float | None = None
-    tly_coord:float | None = None
-    trx_coord:float | None = None
-    try_coord:float | None = None
-    brx_coord:float | None = None
-    brx_coord:float | None = None
+    # Corner coordinates: x = longitude, y = latitude
+    blx_coord: float | None = None  # Bottom-left longitude
+    bly_coord: float | None = None  # Bottom-left latitude
+
+    tlx_coord: float | None = None  # Top-left longitude
+    tly_coord: float | None = None  # Top-left latitude
+
+    trx_coord: float | None = None  # Top-right longitude
+    try_coord: float | None = None  # Top-right latitude
+
+    brx_coord: float | None = None  # Bottom-right longitude
+    bry_coord: float | None = None  # Bottom-right latitude
+
     
     # InBound/Outbound Loading meter and and weight 
     inbound_loading_meter: float = 0.0

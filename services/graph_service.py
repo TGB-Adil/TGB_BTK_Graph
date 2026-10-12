@@ -25,7 +25,13 @@ class GraphService:
         if pd.isna(value):
             return 0.0
         return float(value)
-
+    @staticmethod
+    def _optional_number(value) -> float | None:
+        """Convert a coordinate to float, preserving missing values as None."""
+        if value is None or pd.isna(value):
+            return None
+        return float(value)
+    
     def build_graph(self, tables: dict, layer: str) -> Graph:
         if layer not in self.LAYERS:
             raise ValueError(f"Unsupported layer: {layer}")
@@ -138,18 +144,51 @@ class GraphService:
 
                     node = Node(
                         area_seal=node_id,
-                        cx=(
-                            float(coord["as_cx_wgs"])
-                            if coord is not None
-                            and pd.notna(coord["as_cx_wgs"])
-                            else None
-                        ),
-                        cy=(
-                            float(coord["as_cy_wgs"])
-                            if coord is not None
-                            and pd.notna(coord["as_cy_wgs"])
-                            else None
-                        ),
+
+                        # Centre coordinates
+                        cx=self._optional_number(
+                            coord["as_cx_wgs"]
+                        ) if coord is not None else None,
+
+                        cy=self._optional_number(
+                            coord["as_cy_wgs"]
+                        ) if coord is not None else None,
+
+                        # Bottom-left
+                        blx_coord=self._optional_number(
+                            coord["as_blx_wgs"]
+                        ) if coord is not None else None,
+
+                        bly_coord=self._optional_number(
+                            coord["as_bly_wgs"]
+                        ) if coord is not None else None,
+
+                        # Top-left
+                        tlx_coord=self._optional_number(
+                            coord["as_tlx_wgs"]
+                        ) if coord is not None else None,
+
+                        tly_coord=self._optional_number(
+                            coord["as_tly_wgs"]
+                        ) if coord is not None else None,
+
+                        # Top-right
+                        trx_coord=self._optional_number(
+                            coord["as_trx_wgs"]
+                        ) if coord is not None else None,
+
+                        try_coord=self._optional_number(
+                            coord["as_try_wgs"]
+                        ) if coord is not None else None,
+
+                        # Bottom-right
+                        brx_coord=self._optional_number(
+                            coord["as_brx_wgs"]
+                        ) if coord is not None else None,
+
+                        bry_coord=self._optional_number(
+                            coord["as_bry_wgs"]
+                        ) if coord is not None else None,
                     )
 
                     graph.add_node(node)
