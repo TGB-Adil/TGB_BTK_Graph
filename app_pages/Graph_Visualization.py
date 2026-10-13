@@ -681,9 +681,11 @@ def build_geographic_map(graph, visible_ids, visible_edges):
         if inbound_count and outbound_count:
             node_color = "#2563eb"
         elif outbound_count:
-            node_color = "#dc2626"
-        elif inbound_count:
+            # node_color = "#dc2626"
             node_color = "#16a34a"
+        elif inbound_count:
+            node_color = "#dc2626"
+            # node_color = "#16a34a"
         else:
             node_color = "#6b7280"
 
@@ -959,6 +961,10 @@ def render_page():
                 "border": "#1e40af",
             }
         elif inbound["order_count"]:
+            # node_color = {
+            #     "background": "#16a34a",  # Green: outbound only
+            #     "border": "#166534",
+            # }
             node_color = {
                 "background": "#dc2626",  # Red: inbound only
                 "border": "#991b1b",
@@ -968,6 +974,10 @@ def render_page():
                 "background": "#16a34a",  # Green: outbound only
                 "border": "#166534",
             }
+            # node_color = {
+            #     "background": "#dc2626",  # Red: inbound only
+            #     "border": "#991b1b",
+            # }
         else:
             node_color = {
                 "background": "#9ca3af",  # Gray: neither
